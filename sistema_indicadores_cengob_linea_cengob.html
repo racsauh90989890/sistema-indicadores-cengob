@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CENGOB – Sistema de Indicadores</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --verde:     #1a6b35;
+    --verde-osc: #145228;
+    --verde-cl:  #eef6f1;
+    --dorado:    #c9a84c;<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CENGOB – Sistema de Indicadores</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --verde:     #1a6b35;
+    --verde-osc: #145228;
+    --verde-cl:  #eef6f1;
+    --dorado:    #c9a84c;
+    --dorado-cl: #e2c97e;
+    --rojo:      #c0272d;
+    --amarillo:  #f5c518;
+    --gris-bg:   #f2f5f3;
+    --gris-borde:#d6e0d8;
+    --texto:     #1a2e1d;
+    --texto-mut: #5a7060;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--gris-bg); color: var(--texto); font-family: 'Open Sans', sans-serif; min-height: 100vh; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--verde); padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 76px; box-shadow: 0 2px 14px rgba(0,0,0,.3);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo-area { display: flex; align-items: center; gap: 1rem; }
+  .logo-svg  { width: 54px; height: 54px; flex-shrink: 0; }
+  .logo-text-block { display: flex; flex-direction: column; gap: .08rem; }
+  .logo-cengob { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 2.1rem; color: #fff; letter-spacing: .05em; line-height: 1; }
+  .logo-sub { display: block; background: var(--dorado); color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .52rem; letter-spacing: .18em; text-transform: uppercase; padding: .22rem .6rem .24rem; }
+  .tricolor { display: flex; height: 4px; }
+  .tricolor span { flex: 1; }
+  .tc-r { background: var(--rojo); } .tc-y { background: var(--amarillo); } .tc-g { background: var(--verde-osc); }
+  .topbar-right { text-align: right; font-family: 'Montserrat', sans-serif; font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.7); line-height: 1.5; }
+
+  /* ── SUBHEADER ── */
+  .subheader { background: var(--verde-osc); border-bottom: 3px solid var(--dorado); padding: .55rem 2rem; display: flex; align-items: center; gap: 1rem; }
+  .sub-label { font-family:'Montserrat',sans-serif; font-weight:700; font-size:.72rem; color:var(--dorado); letter-spacing:.14em; text-transform:uppercase; }
+  .sub-sep   { color: rgba(255,255,255,.2); }
+  .sub-desc  { font-size: .75rem; color: rgba(255,255,255,.6); }
+
+  /* ── NAV TABS ── */
+  .nav-tabs { background: #fff; border-bottom: 2px solid var(--gris-borde); display: flex; padding: 0 2rem; }
+  .tab-btn { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; padding: .9rem 1.4rem; border: none; background: none; color: var(--texto-mut); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .2s; }
+  .tab-btn:hover { color: var(--verde); }
+  .tab-btn.active { color: var(--verde); border-bottom-color: var(--dorado); }
+
+  /* ── MAIN ── */
+  .main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── STATS ── */
+  .stats { display: flex; gap: .9rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+  .stat-card { background: var(--verde); border-radius: 10px; padding: .85rem 1.4rem; display: flex; align-items: center; gap: .8rem; color: #fff; box-shadow: 0 2px 10px rgba(26,107,53,.22); flex: 1; min-width: 160px; border-left: 5px solid var(--dorado); }
+  .stat-n { font-family:'Montserrat',sans-serif; font-weight:800; font-size:2.1rem; color:var(--dorado-cl); line-height:1; }
+  .stat-l { font-size:.74rem; color:rgba(255,255,255,.82); line-height:1.4; }
+
+  /* ── CHARTS GRID ── */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.5rem; }
+  .chart-wide { grid-column: 1 / -1; }
+  .chart-card { background: #fff; border: 1px solid var(--gris-borde); border-radius: 12px; padding: 1.3rem 1.5rem; box-shadow: 0 1px 5px rgba(0,0,0,.06); }
+  .chart-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.1rem; padding-bottom: .7rem; border-bottom: 1px solid var(--gris-borde); }
+  .chart-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .88rem; color: var(--texto); }
+  .chart-sub { font-size: .72rem; color: var(--texto-mut); margin-top: .1rem; }
+  .chart-tag { background: var(--verde-cl); color: var(--verde); font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; padding: .2rem .6rem; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-left: .5rem; }
+  .chart-wrap canvas { max-height: 300px; }
+  .chart-wrap.tall canvas { max-height: 380px; }
+  #chartEjesBar { min-height: 340px !important; max-height: 340px !important; }
+
+  /* ── CRUCE TABLE ── */
+  .cruce-wrap { overflow-x: auto; margin-top: .5rem; }
+  .cruce-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
+  .cruce-table th { background: var(--verde); color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .63rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem .7rem; text-align: center; white-space: nowrap; border: 1px solid rgba(255,255,255,.15); }
+  .cruce-table th.row-header { text-align: left; min-width: 175px; }
+  .cruce-table td { padding: .55rem .7rem; border: 1px solid var(--gris-borde); text-align: center; transition: background .15s; vertical-align: middle; }
+  .cruce-table td.eje-cell { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .74rem; text-align: left; color: #fff; white-space: nowrap; padding-left: .9rem; }
+  .cruce-table tr:hover td { background: #f0f7f2; }
+  .cruce-table tr:hover td.eje-cell { filter: brightness(1.1); }
+  .cell-dot { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: .72rem; font-weight: 700; color: #fff; }
+  .cell-empty { color: #ccc; font-size: .85rem; }
+  .total-cell { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--verde); }
+
+  /* ── CONTROLS ── */
+  .controls { display: flex; gap: .6rem; margin-bottom: 1.3rem; flex-wrap: wrap; align-items: center; }
+  .btn-ctrl { background: #fff; border: 1.5px solid var(--gris-borde); color: var(--verde); font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .72rem; padding: .45rem 1.1rem; border-radius: 6px; cursor: pointer; letter-spacing: .04em; transition: all .2s; }
+  .btn-ctrl:hover { background: var(--verde); color: #fff; border-color: var(--verde); }
+  .filter-label { font-size:.75rem; color:var(--texto-mut); font-weight:600; }
+  .filter-select { border: 1.5px solid var(--gris-borde); background:#fff; color:var(--texto); font-family:'Open Sans',sans-serif; font-size:.75rem; padding:.43rem .8rem; border-radius:6px; cursor:pointer; outline:none; }
+  .filter-select:focus { border-color: var(--verde); }
+
+  /* ── EJE CARDS ── */
+  .ejes { display: flex; flex-direction: column; gap: .9rem; }
+  .eje-card { background: #fff; border: 1px solid var(--gris-borde); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05); transition: box-shadow .2s; }
+  .eje-card.open { box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+  .eje-header { display: flex; align-items: center; gap: 1rem; padding: .95rem 1.3rem; cursor: pointer; user-select: none; transition: background .18s; }
+  .eje-header:hover { background: #f5faf6; }
+  .eje-stripe { width: 5px; border-radius: 3px; align-self: stretch; min-height: 38px; flex-shrink: 0; }
+  .eje-badge { font-family:'Montserrat',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; padding:.3rem .75rem; border-radius:20px; white-space:nowrap; flex-shrink:0; color:#fff; }
+  .eje-name { flex:1; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.93rem; color:var(--texto); }
+  .eje-count { font-size:.73rem; color:var(--texto-mut); white-space:nowrap; font-weight:600; }
+  .eje-chevron { width:20px; height:20px; color:var(--texto-mut); transition:transform .3s; flex-shrink:0; }
+  .eje-card.open .eje-chevron { transform: rotate(180deg); }
+  .interventions { display: none; }
+  .eje-card.open .interventions { display: block; }
+  .int-head { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; padding: .5rem 1.4rem .5rem 3.6rem; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.85); border-top:1px solid rgba(0,0,0,.08); }
+  .int-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; padding: .78rem 1.4rem .78rem 3.6rem; border-top: 1px solid var(--gris-borde); align-items: start; transition: background .15s; }
+  .int-row:nth-child(even) { background: #fafcfa; }
+  .int-row:hover { background: #eef5f0; }
+  .int-name { font-size:.86rem; font-weight:600; color:var(--texto); line-height:1.45; }
+  .ministries { display:flex; flex-direction:column; gap:.35rem; }
+  .min-tag { display:flex; align-items:flex-start; gap:.4rem; font-size:.75rem; color:var(--texto-mut); line-height:1.35; }
+  .min-dot { width:6px; height:6px; border-radius:50%; margin-top:.25rem; flex-shrink:0; }
+
+  /* ── LEGEND ── */
+  .legend { display:flex; flex-wrap:wrap; gap:.5rem .9rem; margin-top:.9rem; }
+  .legend-item { display:flex; align-items:center; gap:.4rem; font-size:.72rem; color:var(--texto-mut); }
+  .legend-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+
+  /* ── FOOTER ── */
+  .footer-bar { display:flex; height:6px; border-radius:3px; overflow:hidden; margin-top:2.5rem; }
+  .footer-bar span { flex:1; }
+  .footer-note { margin-top:.75rem; font-size:.7rem; color:var(--texto-mut); text-align:center; }
+
+  @media (max-width: 768px) {
+    .charts-grid { grid-template-columns: 1fr; }
+    .chart-wide { grid-column: 1; }
+    .int-head, .int-row { grid-template-columns: 1fr; }
+    .int-head .col-m { display: none; }
+    .topbar-right { display: none; }
+    .nav-tabs { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-area">
+    <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+      <path d="M8 32 A25 25 0 0 1 40 8"  stroke="#c9a84c" stroke-width="3"   stroke-linecap="round" fill="none" opacity=".4"/>
+      <path d="M12 32 A20 20 0 0 1 40 13" stroke="#c9a84c" stroke-width="3"   stroke-linecap="round" fill="none" opacity=".65"/>
+      <path d="M16 32 A15 15 0 0 1 40 18" stroke="#c9a84c" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <path d="M48 22 A18 18 0 1 0 48 42 L38 42 L38 34 L48 34" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <div class="logo-text-block">
+      <div class="logo-cengob">CENGOB</div>
+      <div>
+        <span class="logo-sub">Ministerio de la Presidencia</span>
+        <div class="tricolor"><span class="tc-r"></span><span class="tc-y"></span><span class="tc-g"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">Sistema de Indicadores<br>Panel de Intervenciones Estratégicas</div>
+</div>
+
+<!-- SUBHEADER -->
+<div class="subheader">
+  <span class="sub-label">Ejes Estratégicos</span>
+  <span class="sub-sep">|</span>
+  <span class="sub-desc">Intervenciones · Ministerios Responsables · Análisis Cruzado</span>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('resumen', this)">📊 Resumen</button>
+  <button class="tab-btn" onclick="switchTab('analisis', this)">🔀 Análisis Cruzado</button>
+  <button class="tab-btn" onclick="switchTab('detalle', this)">📋 Detalle</button>
+</div>
+
+<div class="main">
+
+  <!-- ══ TAB 1: RESUMEN ══ -->
+  <div id="tab-resumen" class="tab-panel active">
+    <div class="stats">
+      <div class="stat-card"><div class="stat-n">7</div><div class="stat-l">Ejes<br>Estratégicos</div></div>
+      <div class="stat-card"><div class="stat-n">32</div><div class="stat-l">Intervenciones<br>Registradas</div></div>
+      <div class="stat-card"><div class="stat-n">14</div><div class="stat-l">Ministerios<br>Responsables</div></div>
+      <div class="stat-card"><div class="stat-n">6</div><div class="stat-l">Intervenciones<br>con más de 1 Min.</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Intervenciones por Eje Estratégico</div><div class="chart-sub">Cantidad total por eje</div></div>
+          <span class="chart-tag">Barras</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartEjesBar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Distribución Porcentual</div><div class="chart-sub">Participación de cada eje en el total</div></div>
+          <span class="chart-tag">Donut</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartDonut"></canvas></div>
+        <div class="legend" id="donut-legend"></div>
+      </div>
+      <div class="chart-card chart-wide">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Ministerios y Entidades – Número de Intervenciones</div><div class="chart-sub">Un ministerio puede participar en intervenciones de varios ejes</div></div>
+          <span class="chart-tag">Ranking</span>
+        </div>
+        <div class="chart-wrap tall"><canvas id="chartMinisterios"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: ANÁLISIS CRUZADO ══ -->
+  <div id="tab-analisis" class="tab-panel">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Perfil de Intervenciones por Eje</div><div class="chart-sub">Comparativo multidimensional</div></div>
+          <span class="chart-tag">Radar</span>
+        </div>
+        <div class="chart-wrap tall"><canvas id="chartRadar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Ministerios con Presencia en Múltiples Ejes</div><div class="chart-sub">Desglose de intervenciones por eje</div></div>
+          <span class="chart-tag">Apilado</span>
+        </div>
+        <div class="chart-wrap tall"><canvas id="chartStacked"></canvas></div>
+      </div>
+      <div class="chart-card chart-wide">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Mapa de Cruce: Ejes Estratégicos × Ministerios / Entidades</div><div class="chart-sub">Presencia (●) de cada entidad en cada eje estratégico</div></div>
+          <span class="chart-tag">Mapa cruzado</span>
+        </div>
+        <div class="cruce-wrap"><table class="cruce-table" id="cruceTable"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: DETALLE ══ -->
+  <div id="tab-detalle" class="tab-panel">
+    <div class="controls">
+      <button class="btn-ctrl" onclick="toggleAll(true)">▾ Expandir todo</button>
+      <button class="btn-ctrl" onclick="toggleAll(false)">▴ Colapsar todo</button>
+      <span class="filter-label">Filtrar:</span>
+      <select class="filter-select" id="filterMin" onchange="applyFilter()">
+        <option value="">Todos los ministerios</option>
+      </select>
+    </div>
+    <div class="ejes" id="ejes"></div>
+  </div>
+
+  <div class="footer-bar">
+    <span style="background:var(--rojo)"></span>
+    <span style="background:var(--amarillo)"></span>
+    <span style="background:var(--verde)"></span>
+  </div>
+  <div class="footer-note">CENGOB · Centro de Gobierno · Ministerio de la Presidencia · Estado Plurinacional de Bolivia</div>
+</div>
+
+<script>
+/* ═══════════════════ DATA (verificado: 32 intervenciones, 7 ejes, 14 Min. + INRA) ═══════════════════ */
+const EJES = [
+  { eje:"Economía para la Gente",      code:"EJE 1",   color:"#1a6b35",
+    items:[
+      { name:"Ley de Hidrocarburos",                                                       mins:["Ministerio de Hidrocarburos y Energías"] },
+      { name:"Reforma Ley General del Trabajo",                                            mins:["Ministerio de Trabajo"] },
+      { name:"Reformas e incentivos tributarios",                                          mins:["Ministerio de Economía"] },
+      { name:"Fuentes de financiamiento turismo-cultura-gastronomía",                      mins:["Ministerio de Turismo Sostenible","Ministerio de Economía"] },
+      { name:"Autorizaciones transitorias Ley Minera (CAM)",                               mins:["Ministerio de Minería y Metalurgia"] },
+    ]
+  },
+  { eje:"Bolivia al Mundo",            code:"EJE 2",   color:"#1a7a5e",
+    items:[
+      { name:"HUB Viru Viru – Cielos abiertos",                                            mins:["Ministerio de Obras Públicas"] },
+      { name:"Agua potable y saneamiento para todos",                                      mins:["Ministerio de Desarrollo Productivo Rural y Agua"] },
+      { name:"Capacitación, promoción e Infraestructura Turística Marca País (Uyuni – Lagunas)", mins:["Ministerio de Turismo Sostenible"] },
+      { name:"Agencia de Promoción de Exportaciones e Inversiones",                        mins:["Ministerio de Relaciones Exteriores"] },
+      { name:"Posicionamiento minero PDAC 2026 – RIGI",                                   mins:["Ministerio de Minería y Metalurgia"] },
+    ]
+  },
+  { eje:"Bolivia 50/50",               code:"EJE 3",   color:"#c0272d",
+    items:[
+      { name:"Nueva Ley de Autonomías",                                                    mins:["Ministerio de la Presidencia"] },
+      { name:"Nuevo Sistema Nacional de Salud",                                            mins:["Ministerio de Salud y Deportes"] },
+      { name:"Reordenamiento Sistema Educativo",                                           mins:["Ministerio de Educación"] },
+      { name:"Participación laboral de mujeres (cuidados)",                                mins:["Ministerio de Trabajo"] },
+      { name:"Nueva Ley de Seguridad Ciudadana",                                           mins:["Ministerio de Gobierno"] },
+    ]
+  },
+  { eje:"Modernización y Transparencia", code:"EJE 4-5", color:"#5e3d8f",
+    items:[
+      { name:"Desregulación y desburocratización",                                         mins:["Ministerio de la Presidencia"] },
+      { name:"Integración ciudadanía digital",                                             mins:["Ministerio de la Presidencia"] },
+      { name:"Modernización del SPIE",                                                     mins:["Ministerio de Planificación del Desarrollo"] },
+      { name:"Adecuación a normas de transparencia y lucha contra la corrupción con estándares internacionales", mins:["Ministerio de la Presidencia"] },
+      { name:"Actualizar los reglamentos de los sistemas de la Ley N°1178",                mins:["Ministerio de Planificación del Desarrollo"] },
+      { name:"Norma organización Órgano Ejecutivo",                                        mins:["Ministerio de la Presidencia"] },
+    ]
+  },
+  { eje:"Bienestar para Todos",        code:"EJE 6",   color:"#1461a0",
+    items:[
+      { name:"Redes integradas intersectoriales",                                          mins:["Ministerio de Salud y Deportes"] },
+      { name:"Atención primaria – capacidad resolutiva",                                   mins:["Ministerio de Salud y Deportes"] },
+      { name:"Garantizar horas, transparencia y mejoras",                                  mins:["Ministerio de Educación"] },
+      { name:"Escuelas normales (3.000 mejores postulantes)",                              mins:["Ministerio de Educación"] },
+      { name:"Agua, saneamiento y vivienda",                                               mins:["Ministerio de Desarrollo Productivo Rural y Agua"] },
+      { name:"Intersectorial (Educación, Salud, Agua, Vivienda) Zonas Nuevas de saneamiento", mins:["Ministerio de la Presidencia"] },
+    ]
+  },
+  { eje:"Verde y Sostenible",          code:"EJE 7",   color:"#2d6a30",
+    items:[
+      { name:"Ley de Medio Ambiente (Ley 1333)",                                           mins:["Ministerio de Defensa","Ministerio de Hidrocarburos y Energías"] },
+      { name:"Reforma normativa (Energía Verde, Forestal, Agua)",                          mins:["Ministerio de Hidrocarburos y Energías"] },
+      { name:"Taxonomía verde",                                                            mins:["Ministerio de Planificación del Desarrollo","Ministerio de Hidrocarburos y Energías"] },
+      { name:"Fortalecimiento de la Prevención de desastres naturales",                    mins:["Ministerio de Defensa"] },
+      { name:"Proceso de saneamiento de tierras (+ modif. de la Ley INRA)",               mins:["Ministerio de Planificación del Desarrollo","INRA"] },
+    ]
+  }
+];
+
+const MIN_SHORT = {
+  "Ministerio de Hidrocarburos y Energías":         "Hidrocarburos y Energías",
+  "Ministerio de Trabajo":                           "Trabajo",
+  "Ministerio de Economía":                          "Economía",
+  "Ministerio de Turismo Sostenible":                "Turismo Sostenible",
+  "Ministerio de Minería y Metalurgia":              "Minería y Metalurgia",
+  "Ministerio de Obras Públicas":                    "Obras Públicas",
+  "Ministerio de Desarrollo Productivo Rural y Agua":"Des. Productivo y Agua",
+  "Ministerio de Relaciones Exteriores":             "Relaciones Exteriores",
+  "Ministerio de la Presidencia":                    "Presidencia",
+  "Ministerio de Salud y Deportes":                  "Salud y Deportes",
+  "Ministerio de Educación":                         "Educación",
+  "Ministerio de Gobierno":                          "Gobierno",
+  "Ministerio de Planificación del Desarrollo":      "Planificación",
+  "Ministerio de Defensa":                           "Defensa",
+  "INRA":                                            "INRA"
+};
+
+/* ─ helpers ─ */
+function minCount() {
+  const c = {};
+  EJES.forEach(e => e.items.forEach(i => i.mins.forEach(m => { c[m]=(c[m]||0)+1; })));
+  return c;
+}
+function minPerEje() {
+  const r = {};
+  EJES.forEach(e => e.items.forEach(i => i.mins.forEach(m => {
+    if(!r[m]) r[m]={};
+    r[m][e.code]=(r[m][e.code]||0)+1;
+  })));
+  return r;
+}
+
+Chart.defaults.font.family = "'Open Sans', sans-serif";
+Chart.defaults.plugins.legend.display = false;
+
+/* ── CHART 1: Barras por eje ── */
+function buildBarEjes() {
+  const pluginEtiquetasVerticales = {
+    id: 'etiquetasVerticales',
+    afterDatasetsDraw(chart) {
+      const { ctx, data, scales: { x, y } } = chart;
+      ctx.save();
+      data.labels.forEach((label, i) => {
+        const bar = chart.getDatasetMeta(0).data[i];
+        const xPos = bar.x;
+        const yTop = bar.y;
+        const yBottom = y.getPixelForValue(0);
+        const barHeight = yBottom - yTop;
+        const fullLabel = `${EJES[i].code}  –  ${EJES[i].eje}`;
+        ctx.save();
+        ctx.translate(xPos, yTop + barHeight / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.font = 'bold 12px Montserrat, Open Sans, sans-serif';
+        ctx.fillText(fullLabel, 0, 0);
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+  };
+
+  new Chart(document.getElementById('chartEjesBar'), {
+    type:'bar',
+    data:{
+      labels: EJES.map(e => e.code),
+      datasets:[{ data:EJES.map(e=>e.items.length), backgroundColor:EJES.map(e=>e.color), borderRadius:6, borderSkipped:false }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio: true,
+      plugins:{
+        tooltip:{ callbacks:{ title:i=>`${EJES[i[0].dataIndex].code} – ${EJES[i[0].dataIndex].eje}`, label:i=>` ${i.raw} intervenciones` } }
+      },
+      scales:{
+        y:{ beginAtZero:true, max: 9, ticks:{stepSize:1}, grid:{color:'rgba(0,0,0,.06)'} },
+        x:{ grid:{display:false}, ticks:{ font:{ size:11, weight:'600' }, color:'#1a2e1d' } }
+      }
+    },
+    plugins: [pluginEtiquetasVerticales]
+  });
+}
+
+/* ── CHART 2: Donut ── */
+function buildDonut() {
+  new Chart(document.getElementById('chartDonut'), {
+    type:'doughnut',
+    data:{
+      labels: EJES.map(e=>`${e.code} – ${e.eje}`),
+      datasets:[{ data:EJES.map(e=>e.items.length), backgroundColor:EJES.map(e=>e.color), borderWidth:3, borderColor:'#fff', hoverOffset:8 }]
+    },
+    options:{ responsive:true, cutout:'62%', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:i=>` ${i.raw} intervenciones (${Math.round(i.raw/32*100)}%)` } } } }
+  });
+  const leg = document.getElementById('donut-legend');
+  EJES.forEach(e => { leg.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${e.color}"></div>${e.code} – ${e.eje} (${e.items.length})</div>`; });
+}
+
+/* ── CHART 3: Ranking ministerios ── */
+function buildMinBar() {
+  const counts = minCount();
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  new Chart(document.getElementById('chartMinisterios'), {
+    type:'bar',
+    data:{
+      labels: sorted.map(([m])=>MIN_SHORT[m]||m),
+      datasets:[{ data:sorted.map(([,v])=>v),
+        backgroundColor: sorted.map(([,v])=> v>=5?'#1a6b35': v===4?'#1a7a5e': v===3?'#c9a84c': v===2?'#1461a0':'#8aad92'),
+        borderRadius:5, borderSkipped:false }]
+    },
+    options:{
+      indexAxis:'y', responsive:true,
+      plugins:{ tooltip:{ callbacks:{ title:i=>sorted[i[0].dataIndex][0], label:i=>` ${i.raw} intervenciones` } } },
+      scales:{ x:{beginAtZero:true, ticks:{stepSize:1}, grid:{color:'rgba(0,0,0,.06)'}}, y:{grid:{display:false}} }
+    }
+  });
+}
+
+/* ── CHART 4: Radar ── */
+function buildRadar() {
+  new Chart(document.getElementById('chartRadar'), {
+    type:'radar',
+    data:{
+      labels: EJES.map(e=>[e.code, e.eje]),
+      datasets:[{ label:'Intervenciones', data:EJES.map(e=>e.items.length),
+        backgroundColor:'rgba(26,107,53,.15)', borderColor:'#1a6b35', borderWidth:2.5,
+        pointBackgroundColor:EJES.map(e=>e.color), pointRadius:6 }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{ callbacks:{ title:i=>`${EJES[i[0].dataIndex].code} - ${EJES[i[0].dataIndex].eje}`, label:i=>` ${i.raw} intervenciones` } }
+      },
+      scales:{
+        r:{
+          beginAtZero:true,
+          ticks:{ stepSize:1, backdropColor:'transparent', font:{size:10} },
+          grid:{ color:'rgba(0,0,0,.1)' },
+          pointLabels:{
+            font:{ size:11, weight:'bold', family:"'Montserrat', sans-serif" },
+            color: (ctx) => EJES[ctx.index]?.color || '#1a2e1d',
+            padding: 10
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ── CHART 5: Stacked ministerios multi-eje ── */
+function buildStacked() {
+  const mpe = minPerEje();
+  const counts = minCount();
+  const filtered = Object.keys(counts).filter(m=>counts[m]>=2).sort((a,b)=>counts[b]-counts[a]);
+  new Chart(document.getElementById('chartStacked'), {
+    type:'bar',
+    data:{
+      labels: filtered.map(m=>MIN_SHORT[m]||m),
+      datasets: EJES.map(e=>({ label:e.code, data:filtered.map(m=>mpe[m]?.[e.code]||0), backgroundColor:e.color, borderRadius:3, borderSkipped:false }))
+    },
+    options:{
+      indexAxis:'y', responsive:true,
+      plugins:{ legend:{display:true, position:'bottom', labels:{boxWidth:12, font:{size:11}}}, tooltip:{mode:'index', intersect:false} },
+      scales:{ x:{stacked:true, beginAtZero:true, ticks:{stepSize:1}}, y:{stacked:true, grid:{display:false}} }
+    }
+  });
+}
+
+/* ── CRUCE TABLE ── */
+function buildCruce() {
+  const mpe = minPerEje();
+  const allMins = Object.keys(mpe).sort((a,b)=>{
+    const ta=EJES.reduce((s,e)=>s+(mpe[a][e.code]||0),0);
+    const tb=EJES.reduce((s,e)=>s+(mpe[b][e.code]||0),0);
+    return tb-ta;
+  });
+  const table = document.getElementById('cruceTable');
+  let html = '<thead><tr><th class="row-header">Ministerio / Entidad</th>';
+  EJES.forEach(e=>{ html+=`<th style="background:${e.color}">${e.code}</th>`; });
+  html += '<th>Total</th></tr></thead><tbody>';
+  allMins.forEach(m=>{
+    const total = EJES.reduce((s,e)=>s+(mpe[m][e.code]||0),0);
+    const domEje = EJES.reduce((best,e)=>(mpe[m][e.code]||0)>(mpe[m][best.code]||0)?e:best, EJES[0]);
+    html += `<tr><td class="eje-cell" style="background:${domEje.color}">${MIN_SHORT[m]||m}</td>`;
+    EJES.forEach(e=>{
+      const v=mpe[m][e.code]||0;
+      html += v ? `<td><span class="cell-dot" style="background:${e.color}">${v}</span></td>` : `<td class="cell-empty">–</td>`;
+    });
+    html += `<td class="total-cell">${total}</td></tr>`;
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+/* ── DETAIL ── */
+function buildDetail() {
+  const container = document.getElementById('ejes');
+  const sel = document.getElementById('filterMin');
+  const allMins = [...new Set(EJES.flatMap(e=>e.items.flatMap(i=>i.mins)))].sort();
+  allMins.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=MIN_SHORT[m]||m; sel.appendChild(o); });
+
+  EJES.forEach(eje=>{
+    const card = document.createElement('div');
+    card.className = 'eje-card';
+    const rows = eje.items.map(item=>`
+      <div class="int-row" data-mins="${item.mins.join('|')}">
+        <div class="int-name">${item.name}</div>
+        <div class="ministries">
+          ${item.mins.map(m=>`<div class="min-tag"><div class="min-dot" style="background:${eje.color}"></div><span>${m}</span></div>`).join('')}
+        </div>
+      </div>`).join('');
+    card.innerHTML = `
+      <div class="eje-header" onclick="toggleCard(this.closest('.eje-card'))">
+        <div class="eje-stripe" style="background:${eje.color}"></div>
+        <div class="eje-badge" style="background:${eje.color}">${eje.code}</div>
+        <div class="eje-name">${eje.eje}</div>
+        <div class="eje-count">${eje.items.length} intervenciones</div>
+        <svg class="eje-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="interventions">
+        <div class="int-head" style="background:${eje.color}"><div>Intervención</div><div class="col-m">Ministerio Responsable</div></div>
+        ${rows}
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function toggleCard(card){ card.classList.toggle('open'); }
+function toggleAll(open){ document.querySelectorAll('.eje-card').forEach(c=>open?c.classList.add('open'):c.classList.remove('open')); }
+function applyFilter(){
+  const val=document.getElementById('filterMin').value;
+  document.querySelectorAll('.eje-card').forEach(card=>{
+    let vis=0;
+    card.querySelectorAll('.int-row').forEach(row=>{
+      const show=!val||row.dataset.mins.includes(val);
+      row.style.display=show?'':'none';
+      if(show)vis++;
+    });
+    card.style.display=(vis>0||!val)?'':'none';
+    if(val&&vis>0) card.classList.add('open');
+    else if(val&&vis===0) card.classList.remove('open');
+  });
+}
+function switchTab(name, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── INIT ── */
+buildBarEjes();
+buildDonut();
+buildMinBar();
+buildRadar();
+buildStacked();
+buildCruce();
+buildDetail();
+</script>
+</body>
+</html>
+
+    --dorado-cl: #e2c97e;
+    --rojo:      #c0272d;
+    --amarillo:  #f5c518;
+    --gris-bg:   #f2f5f3;
+    --gris-borde:#d6e0d8;
+    --texto:     #1a2e1d;
+    --texto-mut: #5a7060;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--gris-bg); color: var(--texto); font-family: 'Open Sans', sans-serif; min-height: 100vh; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--verde); padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 76px; box-shadow: 0 2px 14px rgba(0,0,0,.3);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo-area { display: flex; align-items: center; gap: 1rem; }
+  .logo-svg  { width: 54px; height: 54px; flex-shrink: 0; }
+  .logo-text-block { display: flex; flex-direction: column; gap: .08rem; }
+  .logo-cengob { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 2.1rem; color: #fff; letter-spacing: .05em; line-height: 1; }
+  .logo-sub { display: block; background: var(--dorado); color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .52rem; letter-spacing: .18em; text-transform: uppercase; padding: .22rem .6rem .24rem; }
+  .tricolor { display: flex; height: 4px; }
+  .tricolor span { flex: 1; }
+  .tc-r { background: var(--rojo); } .tc-y { background: var(--amarillo); } .tc-g { background: var(--verde-osc); }
+  .topbar-right { text-align: right; font-family: 'Montserrat', sans-serif; font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.7); line-height: 1.5; }
+
+  /* ── SUBHEADER ── */
+  .subheader { background: var(--verde-osc); border-bottom: 3px solid var(--dorado); padding: .55rem 2rem; display: flex; align-items: center; gap: 1rem; }
+  .sub-label { font-family:'Montserrat',sans-serif; font-weight:700; font-size:.72rem; color:var(--dorado); letter-spacing:.14em; text-transform:uppercase; }
+  .sub-sep   { color: rgba(255,255,255,.2); }
+  .sub-desc  { font-size: .75rem; color: rgba(255,255,255,.6); }
+
+  /* ── NAV TABS ── */
+  .nav-tabs { background: #fff; border-bottom: 2px solid var(--gris-borde); display: flex; padding: 0 2rem; }
+  .tab-btn { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; padding: .9rem 1.4rem; border: none; background: none; color: var(--texto-mut); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .2s; }
+  .tab-btn:hover { color: var(--verde); }
+  .tab-btn.active { color: var(--verde); border-bottom-color: var(--dorado); }
+
+  /* ── MAIN ── */
+  .main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── STATS ── */
+  .stats { display: flex; gap: .9rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+  .stat-card { background: var(--verde); border-radius: 10px; padding: .85rem 1.4rem; display: flex; align-items: center; gap: .8rem; color: #fff; box-shadow: 0 2px 10px rgba(26,107,53,.22); flex: 1; min-width: 160px; border-left: 5px solid var(--dorado); }
+  .stat-n { font-family:'Montserrat',sans-serif; font-weight:800; font-size:2.1rem; color:var(--dorado-cl); line-height:1; }
+  .stat-l { font-size:.74rem; color:rgba(255,255,255,.82); line-height:1.4; }
+
+  /* ── CHARTS GRID ── */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.5rem; }
+  .chart-wide { grid-column: 1 / -1; }
+  .chart-card { background: #fff; border: 1px solid var(--gris-borde); border-radius: 12px; padding: 1.3rem 1.5rem; box-shadow: 0 1px 5px rgba(0,0,0,.06); }
+  .chart-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.1rem; padding-bottom: .7rem; border-bottom: 1px solid var(--gris-borde); }
+  .chart-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .88rem; color: var(--texto); }
+  .chart-sub { font-size: .72rem; color: var(--texto-mut); margin-top: .1rem; }
+  .chart-tag { background: var(--verde-cl); color: var(--verde); font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; padding: .2rem .6rem; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-left: .5rem; }
+  .chart-wrap canvas { max-height: 300px; }
+  .chart-wrap.tall canvas { max-height: 380px; }
+  #chartEjesBar { min-height: 340px !important; max-height: 340px !important; }
+
+  /* ── CRUCE TABLE ── */
+  .cruce-wrap { overflow-x: auto; margin-top: .5rem; }
+  .cruce-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
+  .cruce-table th { background: var(--verde); color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .63rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem .7rem; text-align: center; white-space: nowrap; border: 1px solid rgba(255,255,255,.15); }
+  .cruce-table th.row-header { text-align: left; min-width: 175px; }
+  .cruce-table td { padding: .55rem .7rem; border: 1px solid var(--gris-borde); text-align: center; transition: background .15s; vertical-align: middle; }
+  .cruce-table td.eje-cell { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .74rem; text-align: left; color: #fff; white-space: nowrap; padding-left: .9rem; }
+  .cruce-table tr:hover td { background: #f0f7f2; }
+  .cruce-table tr:hover td.eje-cell { filter: brightness(1.1); }
+  .cell-dot { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: .72rem; font-weight: 700; color: #fff; }
+  .cell-empty { color: #ccc; font-size: .85rem; }
+  .total-cell { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--verde); }
+
+  /* ── CONTROLS ── */
+  .controls { display: flex; gap: .6rem; margin-bottom: 1.3rem; flex-wrap: wrap; align-items: center; }
+  .btn-ctrl { background: #fff; border: 1.5px solid var(--gris-borde); color: var(--verde); font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .72rem; padding: .45rem 1.1rem; border-radius: 6px; cursor: pointer; letter-spacing: .04em; transition: all .2s; }
+  .btn-ctrl:hover { background: var(--verde); color: #fff; border-color: var(--verde); }
+  .filter-label { font-size:.75rem; color:var(--texto-mut); font-weight:600; }
+  .filter-select { border: 1.5px solid var(--gris-borde); background:#fff; color:var(--texto); font-family:'Open Sans',sans-serif; font-size:.75rem; padding:.43rem .8rem; border-radius:6px; cursor:pointer; outline:none; }
+  .filter-select:focus { border-color: var(--verde); }
+
+  /* ── EJE CARDS ── */
+  .ejes { display: flex; flex-direction: column; gap: .9rem; }
+  .eje-card { background: #fff; border: 1px solid var(--gris-borde); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05); transition: box-shadow .2s; }
+  .eje-card.open { box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+  .eje-header { display: flex; align-items: center; gap: 1rem; padding: .95rem 1.3rem; cursor: pointer; user-select: none; transition: background .18s; }
+  .eje-header:hover { background: #f5faf6; }
+  .eje-stripe { width: 5px; border-radius: 3px; align-self: stretch; min-height: 38px; flex-shrink: 0; }
+  .eje-badge { font-family:'Montserrat',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; padding:.3rem .75rem; border-radius:20px; white-space:nowrap; flex-shrink:0; color:#fff; }
+  .eje-name { flex:1; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.93rem; color:var(--texto); }
+  .eje-count { font-size:.73rem; color:var(--texto-mut); white-space:nowrap; font-weight:600; }
+  .eje-chevron { width:20px; height:20px; color:var(--texto-mut); transition:transform .3s; flex-shrink:0; }
+  .eje-card.open .eje-chevron { transform: rotate(180deg); }
+  .interventions { display: none; }
+  .eje-card.open .interventions { display: block; }
+  .int-head { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; padding: .5rem 1.4rem .5rem 3.6rem; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.85); border-top:1px solid rgba(0,0,0,.08); }
+  .int-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; padding: .78rem 1.4rem .78rem 3.6rem; border-top: 1px solid var(--gris-borde); align-items: start; transition: background .15s; }
+  .int-row:nth-child(even) { background: #fafcfa; }
+  .int-row:hover { background: #eef5f0; }
+  .int-name { font-size:.86rem; font-weight:600; color:var(--texto); line-height:1.45; }
+  .ministries { display:flex; flex-direction:column; gap:.35rem; }
+  .min-tag { display:flex; align-items:flex-start; gap:.4rem; font-size:.75rem; color:var(--texto-mut); line-height:1.35; }
+  .min-dot { width:6px; height:6px; border-radius:50%; margin-top:.25rem; flex-shrink:0; }
+
+  /* ── LEGEND ── */
+  .legend { display:flex; flex-wrap:wrap; gap:.5rem .9rem; margin-top:.9rem; }
+  .legend-item { display:flex; align-items:center; gap:.4rem; font-size:.72rem; color:var(--texto-mut); }
+  .legend-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+
+  /* ── FOOTER ── */
+  .footer-bar { display:flex; height:6px; border-radius:3px; overflow:hidden; margin-top:2.5rem; }
+  .footer-bar span { flex:1; }
+  .footer-note { margin-top:.75rem; font-size:.7rem; color:var(--texto-mut); text-align:center; }
+
+  @media (max-width: 768px) {
+    .charts-grid { grid-template-columns: 1fr; }
+    .chart-wide { grid-column: 1; }
+    .int-head, .int-row { grid-template-columns: 1fr; }
+    .int-head .col-m { display: none; }
+    .topbar-right { display: none; }
+    .nav-tabs { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-area">
+    <svg class="logo-svg" viewBox="0 0 60 60" fill="none">
+      <path d="M8 32 A25 25 0 0 1 40 8"  stroke="#c9a84c" stroke-width="3"   stroke-linecap="round" fill="none" opacity=".4"/>
+      <path d="M12 32 A20 20 0 0 1 40 13" stroke="#c9a84c" stroke-width="3"   stroke-linecap="round" fill="none" opacity=".65"/>
+      <path d="M16 32 A15 15 0 0 1 40 18" stroke="#c9a84c" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <path d="M48 22 A18 18 0 1 0 48 42 L38 42 L38 34 L48 34" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <div class="logo-text-block">
+      <div class="logo-cengob">CENGOB</div>
+      <div>
+        <span class="logo-sub">Ministerio de la Presidencia</span>
+        <div class="tricolor"><span class="tc-r"></span><span class="tc-y"></span><span class="tc-g"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">Sistema de Indicadores<br>Panel de Intervenciones Estratégicas</div>
+</div>
+
+<!-- SUBHEADER -->
+<div class="subheader">
+  <span class="sub-label">Ejes Estratégicos</span>
+  <span class="sub-sep">|</span>
+  <span class="sub-desc">Intervenciones · Ministerios Responsables · Análisis Cruzado</span>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('resumen', this)">📊 Resumen</button>
+  <button class="tab-btn" onclick="switchTab('analisis', this)">🔀 Análisis Cruzado</button>
+  <button class="tab-btn" onclick="switchTab('detalle', this)">📋 Detalle</button>
+</div>
+
+<div class="main">
+
+  <!-- ══ TAB 1: RESUMEN ══ -->
+  <div id="tab-resumen" class="tab-panel active">
+    <div class="stats">
+      <div class="stat-card"><div class="stat-n">7</div><div class="stat-l">Ejes<br>Estratégicos</div></div>
+      <div class="stat-card"><div class="stat-n">32</div><div class="stat-l">Intervenciones<br>Registradas</div></div>
+      <div class="stat-card"><div class="stat-n">14</div><div class="stat-l">Ministerios<br>Responsables</div></div>
+      <div class="stat-card"><div class="stat-n">6</div><div class="stat-l">Intervenciones<br>con más de 1 Min.</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Intervenciones por Eje Estratégico</div><div class="chart-sub">Cantidad total por eje</div></div>
+          <span class="chart-tag">Barras</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartEjesBar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Distribución Porcentual</div><div class="chart-sub">Participación de cada eje en el total</div></div>
+          <span class="chart-tag">Donut</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartDonut"></canvas></div>
+        <div class="legend" id="donut-legend"></div>
+      </div>
+      <div class="chart-card chart-wide">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Ministerios y Entidades – Número de Intervenciones</div><div class="chart-sub">Un ministerio puede participar en intervenciones de varios ejes</div></div>
+          <span class="chart-tag">Ranking</span>
+        </div>
+        <div class="chart-wrap tall"><canvas id="chartMinisterios"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: ANÁLISIS CRUZADO ══ -->
+  <div id="tab-analisis" class="tab-panel">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Perfil de Intervenciones por Eje</div><div class="chart-sub">Comparativo multidimensional</div></div>
+          <span class="chart-tag">Radar</span>
+        </div>
+        <div class="chart-wrap tall"><canvas id="chartRadar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Ministerios con Presencia en Múltiples Ejes</div><div class="chart-sub">Desglose de intervenciones por eje</div></div>
+          <span class="chart-tag">Apilado</span>
+        </div>
+        <div class="chart-wrap tall"><canvas id="chartStacked"></canvas></div>
+      </div>
+      <div class="chart-card chart-wide">
+        <div class="chart-card-header">
+          <div><div class="chart-title">Mapa de Cruce: Ejes Estratégicos × Ministerios / Entidades</div><div class="chart-sub">Presencia (●) de cada entidad en cada eje estratégico</div></div>
+          <span class="chart-tag">Mapa cruzado</span>
+        </div>
+        <div class="cruce-wrap"><table class="cruce-table" id="cruceTable"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: DETALLE ══ -->
+  <div id="tab-detalle" class="tab-panel">
+    <div class="controls">
+      <button class="btn-ctrl" onclick="toggleAll(true)">▾ Expandir todo</button>
+      <button class="btn-ctrl" onclick="toggleAll(false)">▴ Colapsar todo</button>
+      <span class="filter-label">Filtrar:</span>
+      <select class="filter-select" id="filterMin" onchange="applyFilter()">
+        <option value="">Todos los ministerios</option>
+      </select>
+    </div>
+    <div class="ejes" id="ejes"></div>
+  </div>
+
+  <div class="footer-bar">
+    <span style="background:var(--rojo)"></span>
+    <span style="background:var(--amarillo)"></span>
+    <span style="background:var(--verde)"></span>
+  </div>
+  <div class="footer-note">CENGOB · Centro de Gobierno · Ministerio de la Presidencia · Estado Plurinacional de Bolivia</div>
+</div>
+
+<script>
+/* ═══════════════════ DATA (verificado: 32 intervenciones, 7 ejes, 14 Min. + INRA) ═══════════════════ */
+const EJES = [
+  { eje:"Economía para la Gente",      code:"EJE 1",   color:"#1a6b35",
+    items:[
+      { name:"Ley de Hidrocarburos",                                                       mins:["Ministerio de Hidrocarburos y Energías"] },
+      { name:"Reforma Ley General del Trabajo",                                            mins:["Ministerio de Trabajo"] },
+      { name:"Reformas e incentivos tributarios",                                          mins:["Ministerio de Economía"] },
+      { name:"Fuentes de financiamiento turismo-cultura-gastronomía",                      mins:["Ministerio de Turismo Sostenible","Ministerio de Economía"] },
+      { name:"Autorizaciones transitorias Ley Minera (CAM)",                               mins:["Ministerio de Minería y Metalurgia"] },
+    ]
+  },
+  { eje:"Bolivia al Mundo",            code:"EJE 2",   color:"#1a7a5e",
+    items:[
+      { name:"HUB Viru Viru – Cielos abiertos",                                            mins:["Ministerio de Obras Públicas"] },
+      { name:"Agua potable y saneamiento para todos",                                      mins:["Ministerio de Desarrollo Productivo Rural y Agua"] },
+      { name:"Capacitación, promoción e Infraestructura Turística Marca País (Uyuni – Lagunas)", mins:["Ministerio de Turismo Sostenible"] },
+      { name:"Agencia de Promoción de Exportaciones e Inversiones",                        mins:["Ministerio de Relaciones Exteriores"] },
+      { name:"Posicionamiento minero PDAC 2026 – RIGI",                                   mins:["Ministerio de Minería y Metalurgia"] },
+    ]
+  },
+  { eje:"Bolivia 50/50",               code:"EJE 3",   color:"#c0272d",
+    items:[
+      { name:"Nueva Ley de Autonomías",                                                    mins:["Ministerio de la Presidencia"] },
+      { name:"Nuevo Sistema Nacional de Salud",                                            mins:["Ministerio de Salud y Deportes"] },
+      { name:"Reordenamiento Sistema Educativo",                                           mins:["Ministerio de Educación"] },
+      { name:"Participación laboral de mujeres (cuidados)",                                mins:["Ministerio de Trabajo"] },
+      { name:"Nueva Ley de Seguridad Ciudadana",                                           mins:["Ministerio de Gobierno"] },
+    ]
+  },
+  { eje:"Modernización y Transparencia", code:"EJE 4-5", color:"#5e3d8f",
+    items:[
+      { name:"Desregulación y desburocratización",                                         mins:["Ministerio de la Presidencia"] },
+      { name:"Integración ciudadanía digital",                                             mins:["Ministerio de la Presidencia"] },
+      { name:"Modernización del SPIE",                                                     mins:["Ministerio de Planificación del Desarrollo"] },
+      { name:"Adecuación a normas de transparencia y lucha contra la corrupción con estándares internacionales", mins:["Ministerio de la Presidencia"] },
+      { name:"Actualizar los reglamentos de los sistemas de la Ley N°1178",                mins:["Ministerio de Planificación del Desarrollo"] },
+      { name:"Norma organización Órgano Ejecutivo",                                        mins:["Ministerio de la Presidencia"] },
+    ]
+  },
+  { eje:"Bienestar para Todos",        code:"EJE 6",   color:"#1461a0",
+    items:[
+      { name:"Redes integradas intersectoriales",                                          mins:["Ministerio de Salud y Deportes"] },
+      { name:"Atención primaria – capacidad resolutiva",                                   mins:["Ministerio de Salud y Deportes"] },
+      { name:"Garantizar horas, transparencia y mejoras",                                  mins:["Ministerio de Educación"] },
+      { name:"Escuelas normales (3.000 mejores postulantes)",                              mins:["Ministerio de Educación"] },
+      { name:"Agua, saneamiento y vivienda",                                               mins:["Ministerio de Desarrollo Productivo Rural y Agua"] },
+      { name:"Intersectorial (Educación, Salud, Agua, Vivienda) Zonas Nuevas de saneamiento", mins:["Ministerio de la Presidencia"] },
+    ]
+  },
+  { eje:"Verde y Sostenible",          code:"EJE 7",   color:"#2d6a30",
+    items:[
+      { name:"Ley de Medio Ambiente (Ley 1333)",                                           mins:["Ministerio de Defensa","Ministerio de Hidrocarburos y Energías"] },
+      { name:"Reforma normativa (Energía Verde, Forestal, Agua)",                          mins:["Ministerio de Hidrocarburos y Energías"] },
+      { name:"Taxonomía verde",                                                            mins:["Ministerio de Planificación del Desarrollo","Ministerio de Hidrocarburos y Energías"] },
+      { name:"Fortalecimiento de la Prevención de desastres naturales",                    mins:["Ministerio de Defensa"] },
+      { name:"Proceso de saneamiento de tierras (+ modif. de la Ley INRA)",               mins:["Ministerio de Planificación del Desarrollo","INRA"] },
+    ]
+  }
+];
+
+const MIN_SHORT = {
+  "Ministerio de Hidrocarburos y Energías":         "Hidrocarburos y Energías",
+  "Ministerio de Trabajo":                           "Trabajo",
+  "Ministerio de Economía":                          "Economía",
+  "Ministerio de Turismo Sostenible":                "Turismo Sostenible",
+  "Ministerio de Minería y Metalurgia":              "Minería y Metalurgia",
+  "Ministerio de Obras Públicas":                    "Obras Públicas",
+  "Ministerio de Desarrollo Productivo Rural y Agua":"Des. Productivo y Agua",
+  "Ministerio de Relaciones Exteriores":             "Relaciones Exteriores",
+  "Ministerio de la Presidencia":                    "Presidencia",
+  "Ministerio de Salud y Deportes":                  "Salud y Deportes",
+  "Ministerio de Educación":                         "Educación",
+  "Ministerio de Gobierno":                          "Gobierno",
+  "Ministerio de Planificación del Desarrollo":      "Planificación",
+  "Ministerio de Defensa":                           "Defensa",
+  "INRA":                                            "INRA"
+};
+
+/* ─ helpers ─ */
+function minCount() {
+  const c = {};
+  EJES.forEach(e => e.items.forEach(i => i.mins.forEach(m => { c[m]=(c[m]||0)+1; })));
+  return c;
+}
+function minPerEje() {
+  const r = {};
+  EJES.forEach(e => e.items.forEach(i => i.mins.forEach(m => {
+    if(!r[m]) r[m]={};
+    r[m][e.code]=(r[m][e.code]||0)+1;
+  })));
+  return r;
+}
+
+Chart.defaults.font.family = "'Open Sans', sans-serif";
+Chart.defaults.plugins.legend.display = false;
+
+/* ── CHART 1: Barras por eje ── */
+function buildBarEjes() {
+  const pluginEtiquetasVerticales = {
+    id: 'etiquetasVerticales',
+    afterDatasetsDraw(chart) {
+      const { ctx, data, scales: { x, y } } = chart;
+      ctx.save();
+      data.labels.forEach((label, i) => {
+        const bar = chart.getDatasetMeta(0).data[i];
+        const xPos = bar.x;
+        const yTop = bar.y;
+        const yBottom = y.getPixelForValue(0);
+        const barHeight = yBottom - yTop;
+        const fullLabel = `${EJES[i].code}  –  ${EJES[i].eje}`;
+        ctx.save();
+        ctx.translate(xPos, yTop + barHeight / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.font = 'bold 12px Montserrat, Open Sans, sans-serif';
+        ctx.fillText(fullLabel, 0, 0);
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+  };
+
+  new Chart(document.getElementById('chartEjesBar'), {
+    type:'bar',
+    data:{
+      labels: EJES.map(e => e.code),
+      datasets:[{ data:EJES.map(e=>e.items.length), backgroundColor:EJES.map(e=>e.color), borderRadius:6, borderSkipped:false }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio: true,
+      plugins:{
+        tooltip:{ callbacks:{ title:i=>`${EJES[i[0].dataIndex].code} – ${EJES[i[0].dataIndex].eje}`, label:i=>` ${i.raw} intervenciones` } }
+      },
+      scales:{
+        y:{ beginAtZero:true, max: 9, ticks:{stepSize:1}, grid:{color:'rgba(0,0,0,.06)'} },
+        x:{ grid:{display:false}, ticks:{ font:{ size:11, weight:'600' }, color:'#1a2e1d' } }
+      }
+    },
+    plugins: [pluginEtiquetasVerticales]
+  });
+}
+
+/* ── CHART 2: Donut ── */
+function buildDonut() {
+  new Chart(document.getElementById('chartDonut'), {
+    type:'doughnut',
+    data:{
+      labels: EJES.map(e=>`${e.code} – ${e.eje}`),
+      datasets:[{ data:EJES.map(e=>e.items.length), backgroundColor:EJES.map(e=>e.color), borderWidth:3, borderColor:'#fff', hoverOffset:8 }]
+    },
+    options:{ responsive:true, cutout:'62%', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:i=>` ${i.raw} intervenciones (${Math.round(i.raw/32*100)}%)` } } } }
+  });
+  const leg = document.getElementById('donut-legend');
+  EJES.forEach(e => { leg.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${e.color}"></div>${e.code} – ${e.eje} (${e.items.length})</div>`; });
+}
+
+/* ── CHART 3: Ranking ministerios ── */
+function buildMinBar() {
+  const counts = minCount();
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  new Chart(document.getElementById('chartMinisterios'), {
+    type:'bar',
+    data:{
+      labels: sorted.map(([m])=>MIN_SHORT[m]||m),
+      datasets:[{ data:sorted.map(([,v])=>v),
+        backgroundColor: sorted.map(([,v])=> v>=5?'#1a6b35': v===4?'#1a7a5e': v===3?'#c9a84c': v===2?'#1461a0':'#8aad92'),
+        borderRadius:5, borderSkipped:false }]
+    },
+    options:{
+      indexAxis:'y', responsive:true,
+      plugins:{ tooltip:{ callbacks:{ title:i=>sorted[i[0].dataIndex][0], label:i=>` ${i.raw} intervenciones` } } },
+      scales:{ x:{beginAtZero:true, ticks:{stepSize:1}, grid:{color:'rgba(0,0,0,.06)'}}, y:{grid:{display:false}} }
+    }
+  });
+}
+
+/* ── CHART 4: Radar ── */
+function buildRadar() {
+  new Chart(document.getElementById('chartRadar'), {
+    type:'radar',
+    data:{
+      labels: EJES.map(e=>[e.code, e.eje]),
+      datasets:[{ label:'Intervenciones', data:EJES.map(e=>e.items.length),
+        backgroundColor:'rgba(26,107,53,.15)', borderColor:'#1a6b35', borderWidth:2.5,
+        pointBackgroundColor:EJES.map(e=>e.color), pointRadius:6 }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{ callbacks:{ title:i=>`${EJES[i[0].dataIndex].code} - ${EJES[i[0].dataIndex].eje}`, label:i=>` ${i.raw} intervenciones` } }
+      },
+      scales:{
+        r:{
+          beginAtZero:true,
+          ticks:{ stepSize:1, backdropColor:'transparent', font:{size:10} },
+          grid:{ color:'rgba(0,0,0,.1)' },
+          pointLabels:{
+            font:{ size:11, weight:'bold', family:"'Montserrat', sans-serif" },
+            color: (ctx) => EJES[ctx.index]?.color || '#1a2e1d',
+            padding: 10
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ── CHART 5: Stacked ministerios multi-eje ── */
+function buildStacked() {
+  const mpe = minPerEje();
+  const counts = minCount();
+  const filtered = Object.keys(counts).filter(m=>counts[m]>=2).sort((a,b)=>counts[b]-counts[a]);
+  new Chart(document.getElementById('chartStacked'), {
+    type:'bar',
+    data:{
+      labels: filtered.map(m=>MIN_SHORT[m]||m),
+      datasets: EJES.map(e=>({ label:e.code, data:filtered.map(m=>mpe[m]?.[e.code]||0), backgroundColor:e.color, borderRadius:3, borderSkipped:false }))
+    },
+    options:{
+      indexAxis:'y', responsive:true,
+      plugins:{ legend:{display:true, position:'bottom', labels:{boxWidth:12, font:{size:11}}}, tooltip:{mode:'index', intersect:false} },
+      scales:{ x:{stacked:true, beginAtZero:true, ticks:{stepSize:1}}, y:{stacked:true, grid:{display:false}} }
+    }
+  });
+}
+
+/* ── CRUCE TABLE ── */
+function buildCruce() {
+  const mpe = minPerEje();
+  const allMins = Object.keys(mpe).sort((a,b)=>{
+    const ta=EJES.reduce((s,e)=>s+(mpe[a][e.code]||0),0);
+    const tb=EJES.reduce((s,e)=>s+(mpe[b][e.code]||0),0);
+    return tb-ta;
+  });
+  const table = document.getElementById('cruceTable');
+  let html = '<thead><tr><th class="row-header">Ministerio / Entidad</th>';
+  EJES.forEach(e=>{ html+=`<th style="background:${e.color}">${e.code}</th>`; });
+  html += '<th>Total</th></tr></thead><tbody>';
+  allMins.forEach(m=>{
+    const total = EJES.reduce((s,e)=>s+(mpe[m][e.code]||0),0);
+    const domEje = EJES.reduce((best,e)=>(mpe[m][e.code]||0)>(mpe[m][best.code]||0)?e:best, EJES[0]);
+    html += `<tr><td class="eje-cell" style="background:${domEje.color}">${MIN_SHORT[m]||m}</td>`;
+    EJES.forEach(e=>{
+      const v=mpe[m][e.code]||0;
+      html += v ? `<td><span class="cell-dot" style="background:${e.color}">${v}</span></td>` : `<td class="cell-empty">–</td>`;
+    });
+    html += `<td class="total-cell">${total}</td></tr>`;
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+/* ── DETAIL ── */
+function buildDetail() {
+  const container = document.getElementById('ejes');
+  const sel = document.getElementById('filterMin');
+  const allMins = [...new Set(EJES.flatMap(e=>e.items.flatMap(i=>i.mins)))].sort();
+  allMins.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=MIN_SHORT[m]||m; sel.appendChild(o); });
+
+  EJES.forEach(eje=>{
+    const card = document.createElement('div');
+    card.className = 'eje-card';
+    const rows = eje.items.map(item=>`
+      <div class="int-row" data-mins="${item.mins.join('|')}">
+        <div class="int-name">${item.name}</div>
+        <div class="ministries">
+          ${item.mins.map(m=>`<div class="min-tag"><div class="min-dot" style="background:${eje.color}"></div><span>${m}</span></div>`).join('')}
+        </div>
+      </div>`).join('');
+    card.innerHTML = `
+      <div class="eje-header" onclick="toggleCard(this.closest('.eje-card'))">
+        <div class="eje-stripe" style="background:${eje.color}"></div>
+        <div class="eje-badge" style="background:${eje.color}">${eje.code}</div>
+        <div class="eje-name">${eje.eje}</div>
+        <div class="eje-count">${eje.items.length} intervenciones</div>
+        <svg class="eje-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="interventions">
+        <div class="int-head" style="background:${eje.color}"><div>Intervención</div><div class="col-m">Ministerio Responsable</div></div>
+        ${rows}
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function toggleCard(card){ card.classList.toggle('open'); }
+function toggleAll(open){ document.querySelectorAll('.eje-card').forEach(c=>open?c.classList.add('open'):c.classList.remove('open')); }
+function applyFilter(){
+  const val=document.getElementById('filterMin').value;
+  document.querySelectorAll('.eje-card').forEach(card=>{
+    let vis=0;
+    card.querySelectorAll('.int-row').forEach(row=>{
+      const show=!val||row.dataset.mins.includes(val);
+      row.style.display=show?'':'none';
+      if(show)vis++;
+    });
+    card.style.display=(vis>0||!val)?'':'none';
+    if(val&&vis>0) card.classList.add('open');
+    else if(val&&vis===0) card.classList.remove('open');
+  });
+}
+function switchTab(name, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── INIT ── */
+buildBarEjes();
+buildDonut();
+buildMinBar();
+buildRadar();
+buildStacked();
+buildCruce();
+buildDetail();
+</script>
+</body>
+</html>
